@@ -14,6 +14,8 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .header {
@@ -59,8 +61,8 @@
         
         .chat-container {
             flex: 1;
-            max-width: 1200px;
-            width: 90%;
+            max-width: 100%;
+            width: 100%;
             margin: 20px auto;
             padding: 25px;
             background-color: rgba(0, 0, 0, 0.5);
@@ -68,6 +70,7 @@
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
             display: flex;
             flex-direction: column;
+            height: calc(100vh - 150px);
         }
         
         .chat-box {
@@ -78,8 +81,9 @@
             background-color: rgba(20, 20, 20, 0.7);
             border-radius: 12px;
             border: 1px solid #333;
-            min-height: 500px;
-            max-height: 700px;
+            min-height: auto;
+            max-height: none;
+            height: calc(100% - 100px);
         }
         
         .message {
@@ -253,6 +257,28 @@
         .retry-btn:hover {
             background-color: rgba(0, 255, 255, 0.3);
         }
+    .link-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .link-btn {
+        background-color: rgba(0, 255, 255, 0.2);
+        color: #00ffff;
+        border: 1px solid #00ffff;
+        border-radius: 12px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .link-btn:hover {
+        background-color: rgba(0, 255, 255, 0.4);
+    }
     </style>
 </head>
 <body>
@@ -278,10 +304,10 @@
         
         <div class="action-buttons">
             <button class="action-btn" id="edit-btn">Edit</button>
+            <a href="https://link3.to/av_babecoin" target="_blank" class="link-btn">Link 1</a>
+            <a href="https://link3.to/VY5JG29F" target="_blank" class="link-btn">Link 2</a>
             <button class="action-btn" id="resend-btn">Resend</button>
             <button class="action-btn" id="copy-btn">Copy</button>
-            <a href="https://link3.to/av_babecoin" target="_blank" class="action-btn" id="link1-btn">Link 1</a>
-            <a href="https://link3.to/VY5JG29F" target="_blank" class="action-btn" id="link2-btn">Link 2</a>
         </div>
     </div>
     

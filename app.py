@@ -27,10 +27,11 @@ if API_KEY:
     except Exception as e:
         print(f"Warning: Failed to configure Gemini API: {e}")
 
-# Define available models in order of preference (using older, more compatible models)
+# Define available models in order of preference (using newer, more compatible models)
 AVAILABLE_MODELS = [
-    'models/gemini-1.0-pro',        # Stable and widely supported
-    'models/gemini-pro',            # Legacy model for compatibility
+    'gemini-1.5-flash',             # Latest and fastest model
+    'gemini-1.5-pro',               # More powerful model
+    'models/gemini-1.0-pro',        # Stable fallback
     'claude-3-5-sonnet-20241022',   # Latest Claude model
     'claude-3-opus-20240229',       # Claude fallback
     'claude-3-haiku-20240307',      # Fast Claude model
