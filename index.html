@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERONIKA - BABE AI</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-bottom: 3px solid;
+            border-image: linear-gradient(to right, #ff00ff, #00ffff, #ff00cc, #00ccff, #ff33cc) 1;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .title {
+            font-size: 4.5rem;
+            font-weight: bold;
+            margin: 0;
+            background: linear-gradient(to right, #ff00ff, #00ffff, #ff00cc, #00ccff, #ff33cc, #33ccff, #cc33ff, #ff3366, #66ff33);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 8s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.3), 0 0 20px rgba(0, 255, 255, 0.2);
+            letter-spacing: 2px;
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 50% 100%; }
+            50% { background-position: 100% 50%; }
+            75% { background-position: 50% 0%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            margin-top: 10px;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            flex: 1;
+            max-width: 100%;
+            width: 100%;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 150px);
+        }
+        
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: rgba(20, 20, 20, 0.7);
+            border-radius: 12px;
+            border: 1px solid #333;
+            min-height: auto;
+            max-height: none;
+            height: calc(100% - 100px);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: #0a0a23;
+            border: 1px solid #00ccff;
+            color: #ffffff;
+            margin-left: auto;
+            box-shadow: 0 0 8px rgba(0, 204, 255, 0.5);
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background-color: #1a1a2e;
+            border: 1px solid #ff00cc;
+            color: #ffffff;
+            margin-right: auto;
+            box-shadow: 0 0 8px rgba(255, 0, 204, 0.5);
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: 2px solid #333;
+            background-color: rgba(30, 30, 30, 0.8);
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        #user-input:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .send-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(to right, #ff00cc, #00ccff);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 204, 255, 0.4);
+        }
+        
+        .send-btn:active {
+            transform: translateY(0);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(50, 50, 50, 0.8);
+            color: #cccccc;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(70, 70, 70, 0.9);
+            color: #ffffff;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00ffff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-top: 1px solid #333;
+        }
+        
+        .model-status {
+            font-size: 0.8rem;
+            color: #00ffff;
+            margin-top: 5px;
+            padding: 3px 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .error-message {
+            color: #ff5555;
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff5555;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        
+        .refresh-btn {
+            background-color: transparent;
+            color: #00ffff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 5px;
+            margin-left: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+        }
+        
+        .retry-btn {
+            background-color: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .retry-btn:hover {
+            background-color: rgba(0, 255, 255, 0.3);
+        }
+    .link-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .link-btn {
+        background-color: rgba(0, 255, 255, 0.2);
+        color: #00ffff;
+        border: 1px solid #00ffff;
+        border-radius: 12px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .link-btn:hover {
+        background-color: rgba(0, 255, 255, 0.4);
+    }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">VERONIKA</h1>
+        <p class="subtitle">BABE AI - Powered by AV Ecosystem</p>
+    </div>
+    
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <!-- Messages will appear here -->
+            <div class="message bot-message">
+                I am VERONIKA, an BABE AI chatbot powered by the AV Ecosystem. I am designed to be helpful and engaging. Hi there! How can I help you today?
+            </div>
+        </div>
+        
+        <div class="loading" id="loading"></div>
+        
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off">
+            <button class="send-btn" id="send-btn">Send</button>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn" id="edit-btn">Edit</button>
+            <a href="https://link3.to/av_babecoin" target="_blank" class="link-btn">Link 1</a>
+            <a href="https://link3.to/VY5JG29F" target="_blank" class="link-btn">Link 2</a>
+            <button class="action-btn" id="resend-btn">Resend</button>
+            <button class="action-btn" id="copy-btn">Copy</button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        &copy; 2025 AV Ecosystem. All rights reserved.
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBox = document.getElementById('chat-box');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const editBtn = document.getElementById('edit-btn');
+            const resendBtn = document.getElementById('resend-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const loading = document.getElementById('loading');
+            let lastUserMessage = '';
+            let lastBotResponse = '';
+            let isRetrying = false;
+            
+            // Function to add a message to the chat box
+            function addMessage(message, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+                messageDiv.textContent = message;
+                chatBox.appendChild(messageDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                
+                if (isUser) {
+                    lastUserMessage = message;
+                } else {
+                    lastBotResponse = message;
+                }
+            }
+            
+            // Function to send a message to the server
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message === '' || isRetrying) return; // Prevent sending while retrying
+                
+                // Add user message to chat
+                addMessage(message, true);
+                
+                // Clear input field
+                userInput.value = '';
+                
+                // Show loading indicator
+                loading.style.display = 'block';
+                
+                // Send message to server
+                fetch('http://127.0.0.1:5000/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading indicator
+                    loading.style.display = 'none';
+                    
+                    // Check if the response contains an error message
+                    if (data.response && data.response.startsWith('Error:')) {
+                        // Create error message element
+                        const errorDiv = document.createElement('div');
+                        errorDiv.classList.add('message', 'bot-message', 'error-message');
+                        
+                        // Format the error message
+                        let errorMsg = data.response;
+                        let isQuotaError = errorMsg.includes('quota');
+                        
+                        if (isQuotaError) {
+                            errorMsg = 'Rate limit exceeded. The system is automatically trying different models. Please wait a moment and try again.';
+                        }
+                        
+                        errorDiv.textContent = errorMsg;
+                        chatBox.appendChild(errorDiv);
+                        
+                        // Add retry button for quota errors
+                        if (isQuotaError || errorMsg.includes('Maximum retries reached')) {
+                            const retryBtn = document.createElement('button');
+                            retryBtn.classList.add('retry-btn');
+                            retryBtn.textContent = 'Retry with different model';
+                            retryBtn.addEventListener('click', function() {
+                                // Remove the error message and retry button
+                                errorDiv.remove();
+                                retryBtn.remove();
+                                
+                                // Set retry flag to true to indicate we're retrying
+                                isRetrying = true;
+                                
+                                // Show loading indicator
+                                loading.style.display = 'block';
+                                
+                                // Retry the message
+                                fetch('http://127.0.0.1:5000/chat', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ message: lastUserMessage })
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        // Hide loading indicator
+                                        loading.style.display = 'none';
+                                        isRetrying = false;
+                                        
+                                        // Add bot response to chat
+                                        addMessage(data.response, false);
+                                    })
+                                    .catch(error => {
+                                        // Hide loading indicator
+                                        loading.style.display = 'none';
+                                        isRetrying = false;
+                                        
+                                        // Add error message
+                                        addMessage('Failed to retry. Please try again later.', false);
+                                    });
+                            });
+                            chatBox.appendChild(retryBtn);
+                        }
+                    } else {
+                        // Add normal bot response to chat
+                        addMessage(data.response, false);
+                    }
+                    
+                    // Scroll to bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                })
+                .catch(error => {
+                    // Hide loading indicator
+                    loading.style.display = 'none';
+                    
+                    // Add error message to chat
+                    const errorDiv = document.createElement('div');
+                    errorDiv.classList.add('message', 'bot-message', 'error-message');
+                    errorDiv.textContent = 'Sorry, there was an error connecting to the server. Please try again later.';
+                    chatBox.appendChild(errorDiv);
+                    
+                    console.error('Error:', error);
+                    
+                    // Scroll to bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+            }
+            
+            // Event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            editBtn.addEventListener('click', function() {
+                userInput.value = lastUserMessage;
+                userInput.focus();
+            });
+            
+            resendBtn.addEventListener('click', function() {
+                if (lastUserMessage) {
+                    userInput.value = lastUserMessage;
+                    sendMessage();
+                }
+            });
+            
+            copyBtn.addEventListener('click', function() {
+                if (lastBotResponse) {
+                    navigator.clipboard.writeText(lastBotResponse)
+                        .then(() => {
+                            // Temporarily change button text to indicate success
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyBtn.textContent = 'Copy';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy text: ', err);
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
