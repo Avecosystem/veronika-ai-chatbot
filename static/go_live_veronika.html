@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VERONIKA - BABE AI</title>
+    <title>VERONIKA - BABE AI (Go Live Version)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -279,12 +279,39 @@
     .link-btn:hover {
         background-color: rgba(0, 255, 255, 0.4);
     }
+
+    .server-status {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #00ffff;
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .status-connected {
+        background-color: #00ff00;
+    }
+
+    .status-disconnected {
+        background-color: #ff0000;
+    }
     </style>
 </head>
 <body>
     <div class="header">
         <h1 class="title">VERONIKA</h1>
         <p class="subtitle">BABE AI - Powered by AV Ecosystem</p>
+        <div class="server-status">
+            <span class="status-indicator status-disconnected" id="status-indicator"></span>
+            <span id="server-status-text">Checking server status...</span>
+        </div>
     </div>
     
     <div class="chat-container">
@@ -324,9 +351,41 @@
             const resendBtn = document.getElementById('resend-btn');
             const copyBtn = document.getElementById('copy-btn');
             const loading = document.getElementById('loading');
+            const statusIndicator = document.getElementById('status-indicator');
+            const serverStatusText = document.getElementById('server-status-text');
             let lastUserMessage = '';
             let lastBotResponse = '';
             let isRetrying = false;
+            
+            // Check server status
+            function checkServerStatus() {
+                fetch('http://127.0.0.1:5000/test')
+                    .then(response => {
+                        if (response.ok) {
+                            statusIndicator.classList.remove('status-disconnected');
+                            statusIndicator.classList.add('status-connected');
+                            serverStatusText.textContent = 'Connected to server';
+                            return response.json();
+                        } else {
+                            throw new Error('Server not responding');
+                        }
+                    })
+                    .then(data => {
+                        console.log('Server status:', data);
+                    })
+                    .catch(error => {
+                        statusIndicator.classList.remove('status-connected');
+                        statusIndicator.classList.add('status-disconnected');
+                        serverStatusText.textContent = 'Disconnected from server. Make sure the Flask server is running.';
+                        console.error('Error checking server status:', error);
+                    });
+            }
+            
+            // Check server status on page load
+            checkServerStatus();
+            
+            // Check server status every 30 seconds
+            setInterval(checkServerStatus, 30000);
             
             // Function to add a message to the chat box
             function addMessage(message, isUser) {
@@ -359,7 +418,7 @@
                 loading.style.display = 'block';
                 
                 // Send message to server
-                fetch('/chat', {
+                fetch('http://127.0.0.1:5000/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -405,7 +464,7 @@
                                 loading.style.display = 'block';
                                 
                                 // Retry the message
-                                fetch('/chat', {
+                                fetch('http://127.0.0.1:5000/chat', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'

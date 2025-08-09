@@ -12,7 +12,7 @@ import os
 import json
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='')
 
 # Configure Gemini AI with the working API key
 API_KEY = "AIzaSyAHDyynI_EveM7Aic2gVleGv9JBJebARNU"
@@ -26,7 +26,22 @@ print("🤖 Model: Gemini 1.5 Flash")
 @app.route('/')
 def home():
     """Serve the main chat interface"""
-    return render_template('index.html')
+    return app.send_static_file('index.html')
+
+@app.route('/veronika_standalone.html')
+def standalone():
+    """Serve the standalone version"""
+    return app.send_static_file('veronika_standalone.html')
+
+@app.route('/go_live_veronika.html')
+def go_live():
+    """Serve the Go Live version"""
+    return app.send_static_file('go_live_veronika.html')
+
+@app.route('/index_go_live.html')
+def index_go_live():
+    """Serve the index Go Live version"""
+    return app.send_static_file('index_go_live.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -39,85 +54,41 @@ def chat():
         print("\n==== CHAT REQUEST RECEIVED =====")
         print(f"REQUEST DATA: {data}")
         
-        # Write to a debug log file
-        try:
-            with open('debug_log.txt', 'a') as f:
-                f.write(f"\n==== CHAT REQUEST RECEIVED =====\n")
-                f.write(f"REQUEST DATA: {data}\n")
-        except Exception as log_error:
-            print(f"Debug log error: {str(log_error)}")
+        # Debug logging to console only
+        # No file logging to keep things simple
         
         if not user_message:
             return jsonify({'response': 'Please enter a message!'})
         
         print(f"📨 User: {user_message}")
         
-        # Write to debug log
-        try:
-            with open('debug_log.txt', 'a') as f:
-                f.write(f"📨 User: {user_message}\n")
-        except Exception as log_error:
-            print(f"Debug log error: {str(log_error)}")
-        
         # Check for exact phrases - convert to lowercase for case-insensitive comparison
         user_message_lower = user_message.lower()
         print(f"📝 Lowercase message: {user_message_lower}")
         
-        # Write to debug log
-        try:
-            with open('debug_log.txt', 'a') as f:
-                f.write(f"📝 Lowercase message: {user_message_lower}\n")
-        except Exception as log_error:
-            print(f"Debug log error: {str(log_error)}")
-        
         # Check for exact phrases
         if user_message_lower == "say yourself" or user_message_lower == "who are you" or user_message_lower == "introduce yourself":
             print("✅ Exact phrase match detected")
-            try:
-                with open('debug_log.txt', 'a') as f:
-                    f.write("✅ Exact phrase match detected\n")
-            except Exception as log_error:
-                print(f"Debug log error: {str(log_error)}")
             return jsonify({'response': 'I am VERONIKA, an BABE AI chatbot powered by the AV Ecosystem. I am designed to be helpful and engaging.'})
         
         # Check for phrases contained in the message
         if "say yourself" in user_message_lower or "who are you" in user_message_lower or "introduce yourself" in user_message_lower:
             print("✅ Phrase contained in message detected")
-            try:
-                with open('debug_log.txt', 'a') as f:
-                    f.write("✅ Phrase contained in message detected\n")
-            except Exception as log_error:
-                print(f"Debug log error: {str(log_error)}")
             return jsonify({'response': 'I am VERONIKA, an BABE AI chatbot powered by the AV Ecosystem. I am designed to be helpful and engaging.'})
         
         print("❌ No special phrases detected, using AI response")
-        try:
-            with open('debug_log.txt', 'a') as f:
-                f.write("❌ No special phrases detected, using AI response\n")
-        except Exception as log_error:
-            print(f"Debug log error: {str(log_error)}")
         
         # Generate AI response
         response = model.generate_content(user_message)
         ai_response = response.text
         
         print(f"🤖 VERONIKA: {ai_response[:100]}...")
-        try:
-            with open('debug_log.txt', 'a') as f:
-                f.write(f"🤖 VERONIKA: {ai_response[:100]}...\n")
-        except Exception as log_error:
-            print(f"Debug log error: {str(log_error)}")
         
         return jsonify({'response': ai_response})
         
     except Exception as e:
         error_msg = f"Error: {str(e)}"
         print(f"❌ {error_msg}")
-        try:
-            with open('debug_log.txt', 'a') as f:
-                f.write(f"❌ {error_msg}\n")
-        except Exception:
-            pass  # Already logged the error
         return jsonify({'response': 'Sorry, I encountered an error. Please try again!'})
 
 @app.route('/test')

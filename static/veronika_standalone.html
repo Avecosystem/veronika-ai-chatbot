@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VERONIKA - BABE AI</title>
+    <title>VERONIKA - BABE AI (Standalone)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -14,6 +14,8 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .header {
@@ -59,8 +61,8 @@
         
         .chat-container {
             flex: 1;
-            max-width: 1200px;
-            width: 90%;
+            max-width: 100%;
+            width: 100%;
             margin: 20px auto;
             padding: 25px;
             background-color: rgba(0, 0, 0, 0.5);
@@ -68,6 +70,7 @@
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
             display: flex;
             flex-direction: column;
+            height: calc(100vh - 150px);
         }
         
         .chat-box {
@@ -78,8 +81,9 @@
             background-color: rgba(20, 20, 20, 0.7);
             border-radius: 12px;
             border: 1px solid #333;
-            min-height: 500px;
-            max-height: 700px;
+            min-height: auto;
+            max-height: none;
+            height: calc(100% - 100px);
         }
         
         .message {
@@ -253,12 +257,61 @@
         .retry-btn:hover {
             background-color: rgba(0, 255, 255, 0.3);
         }
+    .link-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .link-btn {
+        background-color: rgba(0, 255, 255, 0.2);
+        color: #00ffff;
+        border: 1px solid #00ffff;
+        border-radius: 12px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .link-btn:hover {
+        background-color: rgba(0, 255, 255, 0.4);
+    }
+
+    .server-status {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #00ffff;
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .status-connected {
+        background-color: #00ff00;
+    }
+
+    .status-disconnected {
+        background-color: #ff0000;
+    }
     </style>
 </head>
 <body>
     <div class="header">
         <h1 class="title">VERONIKA</h1>
         <p class="subtitle">BABE AI - Powered by AV Ecosystem</p>
+        <div class="server-status">
+            <span class="status-indicator status-disconnected" id="status-indicator"></span>
+            <span id="server-status-text">Checking server status...</span>
+        </div>
     </div>
     
     <div class="chat-container">
@@ -278,10 +331,10 @@
         
         <div class="action-buttons">
             <button class="action-btn" id="edit-btn">Edit</button>
+            <a href="https://link3.to/av_babecoin" target="_blank" class="link-btn">Link 1</a>
+            <a href="https://link3.to/VY5JG29F" target="_blank" class="link-btn">Link 2</a>
             <button class="action-btn" id="resend-btn">Resend</button>
             <button class="action-btn" id="copy-btn">Copy</button>
-            <a href="https://link3.to/av_babecoin" target="_blank" class="action-btn" id="link1-btn">Link 1</a>
-            <a href="https://link3.to/VY5JG29F" target="_blank" class="action-btn" id="link2-btn">Link 2</a>
         </div>
     </div>
     
@@ -298,9 +351,41 @@
             const resendBtn = document.getElementById('resend-btn');
             const copyBtn = document.getElementById('copy-btn');
             const loading = document.getElementById('loading');
+            const statusIndicator = document.getElementById('status-indicator');
+            const serverStatusText = document.getElementById('server-status-text');
             let lastUserMessage = '';
             let lastBotResponse = '';
             let isRetrying = false;
+            
+            // Check server status
+            function checkServerStatus() {
+                fetch('http://127.0.0.1:5000/test')
+                    .then(response => {
+                        if (response.ok) {
+                            statusIndicator.classList.remove('status-disconnected');
+                            statusIndicator.classList.add('status-connected');
+                            serverStatusText.textContent = 'Connected to server';
+                            return response.json();
+                        } else {
+                            throw new Error('Server not responding');
+                        }
+                    })
+                    .then(data => {
+                        console.log('Server status:', data);
+                    })
+                    .catch(error => {
+                        statusIndicator.classList.remove('status-connected');
+                        statusIndicator.classList.add('status-disconnected');
+                        serverStatusText.textContent = 'Disconnected from server. Make sure the Flask server is running.';
+                        console.error('Error checking server status:', error);
+                    });
+            }
+            
+            // Check server status on page load
+            checkServerStatus();
+            
+            // Check server status every 30 seconds
+            setInterval(checkServerStatus, 30000);
             
             // Function to add a message to the chat box
             function addMessage(message, isUser) {
@@ -333,7 +418,7 @@
                 loading.style.display = 'block';
                 
                 // Send message to server
-                fetch('/chat', {
+                fetch('http://127.0.0.1:5000/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -379,7 +464,7 @@
                                 loading.style.display = 'block';
                                 
                                 // Retry the message
-                                fetch('/chat', {
+                                fetch('http://127.0.0.1:5000/chat', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
